@@ -9,6 +9,15 @@ BASE_DIR = Path(_file_).resolve().parent.parent
 SECRET_KEY = 'dummy-key-for-alx-check-12345'
 
 DEBUG = True
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'bookshelf',  # Add this line
+]
 
 ALLOWED_HOSTS = []
 

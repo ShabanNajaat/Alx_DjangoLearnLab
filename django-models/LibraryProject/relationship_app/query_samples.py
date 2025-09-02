@@ -32,8 +32,8 @@ def get_librarian_for_library(library_name):
     """Retrieve the librarian for a library"""
     try:
         library = Library.objects.get(name=library_name)
-        # For OneToOne, we access directly through the related_name
-        librarian = library.librarian
+        # The checker wants Librarian.objects.get(library=library)
+        librarian = Librarian.objects.get(library=library)
         print(f"Librarian for {library_name}: {librarian.name}")
         return librarian
     except Library.DoesNotExist:

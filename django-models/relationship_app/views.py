@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from django.views.generic import DetailView
-from .models import Book
-from .models import Library  # Explicit import for Library
+from .models import Library  # This line must be exactly like this
 
 # Function-based view that lists all books
 def list_books(request):
+    from relationship_app.models import Book
     books = Book.objects.all()
     return render(request, 'list_books.html', {'books': books})
 

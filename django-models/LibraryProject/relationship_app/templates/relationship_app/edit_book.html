@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Book</title>
+</head>
+<body>
+    <h1>Edit Book: {{ book.title }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" value="{{ book.title }}" required>
+        </div>
+        <div>
+            <label for="author">Author:</label>
+            <select id="author" name="author" required>
+                {% for author in authors %}
+                <option value="{{ author.id }}" {% if author.id == book.author.id %}selected{% endif %}>
+                    {{ author.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="publication_year">Publication Year:</label>
+            <input type="number" id="publication_year" name="publication_year" value="{{ book.publication_year }}" required>
+        </div>
+        <button type="submit">Update Book</button>
+    </form>
+    <a href="{% url 'list_books' %}">Back to Books</a>
+</body>
+</html>

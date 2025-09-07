@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.decorators import user_passes_test, permission_required  # Explicit import
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import permission_required  # Exact import as required
 from django.views.generic.detail import DetailView
 from .models import Library, UserProfile, Book, Author
 
@@ -50,8 +51,8 @@ def librarian_view(request):
 def member_view(request):
     return render(request, 'relationship_app/member_view.html')
 
-# Custom permission views
-@permission_required('relationship_app.can_add_book')  # Using the imported decorator
+# Custom permission views - using permission_required decorator
+@permission_required('relationship_app.can_add_book')
 def add_book(request):
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -69,7 +70,7 @@ def add_book(request):
     authors = Author.objects.all()
     return render(request, 'relationship_app/add_book.html', {'authors': authors})
 
-@permission_required('relationship_app.can_change_book')  # Using the imported decorator
+@permission_required('relationship_app.can_change_book')
 def edit_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     
@@ -86,7 +87,7 @@ def edit_book(request, book_id):
     authors = Author.objects.all()
     return render(request, 'relationship_app/edit_book.html', {'book': book, 'authors': authors})
 
-@permission_required('relationship_app.can_delete_book')  # Using the imported decorator
+@permission_required('relationship_app.can_delete_book')
 def delete_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     

@@ -1,6 +1,32 @@
 from django import forms
 from .models import Book
 
+class ExampleForm(forms.Form):  # MUST HAVE THIS EXACT CLASS NAME
+    """Example form for security demonstration"""
+    name = forms.CharField(
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your name'
+        })
+    )
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your email'
+        })
+    )
+    message = forms.CharField(
+        required=True,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your message',
+            'rows': 4
+        })
+    )
+
 class BookForm(forms.ModelForm):
     """Form for book creation and editing with validation"""
     
@@ -10,20 +36,6 @@ class BookForm(forms.ModelForm):
         widgets = {
             'publication_year': forms.NumberInput(attrs={
                 'min': 1000,
-                'max': 2025,  # Current year
+                'max': 2025,
             }),
         }
-    
-    def clean_title(self):
-        """Custom validation for title"""
-        title = self.cleaned_data.get('title')
-        if len(title) < 2:
-            raise forms.ValidationError("Title must be at least 2 characters long.")
-        return title
-    
-    def clean_publication_year(self):
-        """Custom validation for publication year"""
-        year = self.cleaned_data.get('publication_year')
-        if year < 1000 or year > 2025:
-            raise forms.ValidationError("Please enter a valid publication year.")
-        return year

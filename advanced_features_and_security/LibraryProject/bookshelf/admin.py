@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
 
-@admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     """Admin configuration for custom user model"""
     
@@ -24,3 +23,6 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('email', 'password1', 'password2', 'first_name', 'last_name', 'date_of_birth'),
         }),
     )
+
+# MUST use this exact line (not the decorator)
+admin.site.register(CustomUser, CustomUserAdmin)

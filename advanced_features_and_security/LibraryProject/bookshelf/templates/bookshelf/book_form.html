@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if book %}Edit{% else %}Create{% endif %} Book</title>
+</head>
+<body>
+    <h1>{% if book %}Edit{% else %}Create{% endif %} Book</h1>
+    
+    <form method="post">
+        {% csrf_token %}  <!-- CSRF Token Protection -->
+        
+        <div>
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" value="{{ book.title|default:'' }}" required>
+        </div>
+        
+        <div>
+            <label for="author">Author:</label>
+            <input type="text" id="author" name="author" value="{{ book.author|default:'' }}" required>
+        </div>
+        
+        <div>
+            <label for="publication_year">Publication Year:</label>
+            <input type="number" id="publication_year" name="publication_year" 
+                   value="{{ book.publication_year|default:'' }}" required min="1000" max="{% now 'Y' %}">
+        </div>
+        
+        <button type="submit">Save</button>
+    </form>
+</body>
+</html>

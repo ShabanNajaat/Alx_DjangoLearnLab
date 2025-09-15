@@ -28,22 +28,35 @@ class CustomUserManager(BaseUserManager):
         
         return self.create_user(email, password, **extra_fields)
 
-class CustomUser(AbstractUser):  # MUST HAVE THIS EXACT LINE
+class CustomUser(AbstractUser):
     """Custom user model with additional fields"""
     
-    # Remove username field, use email instead
     username = None
     email = models.EmailField(_('email address'), unique=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
     
-    # Additional fields as required - MUST HAVE THESE EXACT FIELD NAMES
-    date_of_birth = models.DateField(null=True, blank=True)  # MUST HAVE
-    profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)  # MUST HAVE
-    
-    # Set email as the unique identifier
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []  # Remove 'username' from REQUIRED_FIELDS
+    REQUIRED_FIELDS = []
     
     objects = CustomUserManager()
     
-    def __str__(self):
+    def _str_(self):
         return self.email
+
+class Book(models.Model):  # MUST HAVE THIS EXACT CLASS DEFINITION
+    """Book model with custom permissions"""
+    title = models.CharField(max_length=200)
+    author = models.CharField(max_length=100)
+    publication_year = models.IntegerField()
+    
+    class Meta:
+        permissions = [
+            ("can_view", "Can view book"),
+            ("can_create", "Can create book"),  # MUST HAVE can_create
+            ("can_edit", "Can edit book"),
+            ("can_delete", "Can delete book"),  # MUST HAVE can_delete
+        ]
+    
+    def _str_(self):
+        return self.tired

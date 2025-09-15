@@ -1,4 +1,3 @@
-AUTH_USER_MODEL = 'bookshelf.CustomUser'
 # Security settings
 DEBUG = False  # Set to False in production
 
@@ -7,7 +6,8 @@ SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# HTTPS settings
+# HTTPS settings - ADD THESE LINES
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # MUST HAVE THIS EXACT LINE
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = True  # Redirect all HTTP to HTTPS
@@ -44,3 +44,7 @@ DATABASES = {
         },
     }
 }
+
+# If you're behind a proxy/load balancer, add this:
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True

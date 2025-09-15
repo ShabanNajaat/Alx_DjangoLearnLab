@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example Form</title>
+</head>
+<body>
+    <h1>Example Form</h1>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div>{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div>
+            <label>Name:</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+            <div style="color: red;">{{ form.name.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label>Email:</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+            <div style="color: red;">{{ form.email.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label>Message:</label>
+            {{ form.message }}
+            {% if form.message.errors %}
+            <div style="color: red;">{{ form.message.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>

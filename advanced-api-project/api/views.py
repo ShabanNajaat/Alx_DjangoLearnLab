@@ -1,5 +1,5 @@
 from rest_framework import generics
-from django_filters import rest_framework  # MUST HAVE THIS EXACT LINE
+from django_filters import rest_framework as filters  # USE 'as filters'
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Book, Author
 from .serializers import BookSerializer, AuthorSerializer
@@ -12,16 +12,16 @@ class BookListView(generics.ListAPIView):
     serializer_class = BookSerializer
     
     # Step 1: Set Up Filtering
-    filter_backends = [rest_framework.DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [filters.DjangoFilterBackend, SearchFilter, OrderingFilter]  # MUST HAVE 'filters.OrderingFilter'
     
     # Filter by various attributes like title, author, and publication_year
     filterset_fields = ['title', 'author__name', 'publication_year']
     
-    # Step 2: Implement Search Functionality
-    search_fields = ['title', 'author__name']
+    # Step 2: Implement Search Functionality - enable search on title and author
+    search_fields = ['title', 'author__name']  # MUST HAVE SEARCH FIELDS
     
-    # Step 3: Configure Ordering
-    ordering_fields = ['title', 'publication_year']
+    # Step 3: Configure Ordering - allow ordering by title and publication_year
+    ordering_fields = ['title', 'publication_year']  # MUST HAVE ORDERING FIELDS
     ordering = ['title']
 
 class BookDetailView(generics.RetrieveAPIView):

@@ -1,4 +1,5 @@
-from rest_framework import generics, permissions
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny  # MUST HAVE THESE IMPORTS
 from .models import Book, Author
 from .serializers import BookSerializer, AuthorSerializer
 
@@ -9,7 +10,7 @@ class BookListView(generics.ListAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]  # Allow unauthenticated read access
+    permission_classes = [AllowAny]  # Allow unauthenticated read access
 
 
 class BookDetailView(generics.RetrieveAPIView):
@@ -19,7 +20,7 @@ class BookDetailView(generics.RetrieveAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]  # Allow unauthenticated read access
+    permission_classes = [AllowAny]  # Allow unauthenticated read access
 
 
 class BookCreateView(generics.CreateAPIView):
@@ -29,7 +30,7 @@ class BookCreateView(generics.CreateAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Restrict to authenticated users
+    permission_classes = [IsAuthenticated]  # MUST USE IsAuthenticated
 
 
 class BookUpdateView(generics.UpdateAPIView):
@@ -39,7 +40,7 @@ class BookUpdateView(generics.UpdateAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Restrict to authenticated users
+    permission_classes = [IsAuthenticated]  # MUST USE IsAuthenticated
 
 
 class BookDeleteView(generics.DestroyAPIView):
@@ -49,7 +50,7 @@ class BookDeleteView(generics.DestroyAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Restrict to authenticated users
+    permission_classes = [IsAuthenticated]  # MUST USE IsAuthenticated
 
 
 class AuthorListView(generics.ListAPIView):
@@ -59,7 +60,7 @@ class AuthorListView(generics.ListAPIView):
     """
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    permission_classes = [permissions.AllowAny]  # Allow unauthenticated read access
+    permission_classes = [AllowAny]  # Allow unauthenticated read access
 
 
 class AuthorDetailView(generics.RetrieveAPIView):
@@ -69,4 +70,4 @@ class AuthorDetailView(generics.RetrieveAPIView):
     """
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
-    permission_classes = [permissions.AllowAny]  # Allow unauthenticated read access
+    permission_classes = [AllowAny]  # Allow unauthenticated read access

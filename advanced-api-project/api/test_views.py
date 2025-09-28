@@ -1,6 +1,6 @@
 """
-Test views for Django REST Framework APIs
-Testing API endpoints with proper test database configuration
+Unit tests for Django REST Framework APIs
+Testing API endpoints, filtering, searching, ordering, and permissions
 """
 from django.test import TestCase
 from django.urls import reverse
@@ -10,18 +10,18 @@ from rest_framework import status
 from .models import Author, Book
 
 
-class BookViewTests(TestCase):
+class BookAPITestCase(TestCase):
     """
-    Test cases for Book views using separate test database
-    Django automatically creates and manages test database
+    Test case for Book API endpoints including CRUD operations,
+    filtering, searching, ordering, and permissions.
     """
     
     def setUp(self):
         """
-        Set up test data - uses separate test database automatically
-        Test database is created fresh for each test run
+        Set up test data and client for each test
+        Configure separate test database automatically handled by Django
         """
-        # Create test client - using force_authenticate instead of login
+        # Create test client
         self.client = APIClient()
         
         # Create test users
@@ -34,6 +34,7 @@ class BookViewTests(TestCase):
         # Create test authors
         self.author1 = Author.objects.create(name="J.K. Rowling")
         self.author2 = Author.objects.create(name="J.R.R. Tolkien")
+        self.author3 = Author.objects.create(name="George Orwell")
         
         # Create test books
         self.book1 = Book.objects.create(
@@ -46,36 +47,39 @@ class BookViewTests(TestCase):
             publication_year=1937,
             author=self.author2
         )
+        self.book3 = Book.objects.create(
+            title="1984",
+            publication_year=1949,
+            author=self.author3
+        )
     
-    def test_book_list_view_returns_200(self):
+    def test_list_books_returns_200_status_code(self):
         """
-        Test book list view returns HTTP 200 status code
-        Uses separate test database automatically
+        Test that listing books returns HTTP 200 status code
         """
         url = reverse('book-list')
         response = self.client.get(url)
         
-        # Check status code - HTTP 200 OK
+        # MUST CHECK STATUS CODE - HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 3)
     
-    def test_book_detail_view_returns_200(self):
+    def test_retrieve_book_returns_200_status_code(self):
         """
-        Test book detail view returns HTTP 200 status code
+        Test that retrieving a single book returns HTTP 200 status code
         """
         url = reverse('book-detail', kwargs={'pk': self.book1.id})
         response = self.client.get(url)
         
-        # Check status code - HTTP 200 OK
+        # MUST CHECK STATUS CODE - HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['title'], self.book1.title)
     
-    def test_book_create_view_authenticated_returns_201(self):
+    def test_create_book_returns_201_status_code(self):
         """
-        Test book create view with authentication returns HTTP 201
-        Using force_authenticate instead of client.login
+        Test that creating a book returns HTTP 201 status code
         """
-        # Use force_authenticate instead of self.client.login
+        # Authenticate the client
         self.client.force_authenticate(user=self.user)
         
         url = reverse('book-create')
@@ -87,13 +91,13 @@ class BookViewTests(TestCase):
         
         response = self.client.post(url, data, format='json')
         
-        # Check status code - HTTP 201 CREATED
+        # MUST CHECK STATUS CODE - HTTP 201 CREATED
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Book.objects.count(), 3)
+        self.assertEqual(Book.objects.count(), 4)
     
-    def test_book_create_view_unauthenticated_returns_403(self):
+    def test_create_book_unauthenticated_returns_403_status_code(self):
         """
-        Test book create view without authentication returns HTTP 403
+        Test that unauthenticated book creation returns HTTP 403 status code
         """
         url = reverse('book-create')
         data = {
@@ -104,12 +108,12 @@ class BookViewTests(TestCase):
         
         response = self.client.post(url, data, format='json')
         
-        # Check status code - HTTP 403 FORBIDDEN
+        # MUST CHECK STATUS CODE - HTTP 403 FORBIDDEN
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     
-    def test_book_update_view_returns_200(self):
+    def test_update_book_returns_200_status_code(self):
         """
-        Test book update view returns HTTP 200 status code
+        Test that updating a book returns HTTP 200 status code
         """
         self.client.force_authenticate(user=self.user)
         
@@ -122,62 +126,80 @@ class BookViewTests(TestCase):
         
         response = self.client.put(url, data, format='json')
         
-        # Check status code - HTTP 200 OK
+        # MUST CHECK STATUS CODE - HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
-    def test_book_delete_view_returns_204(self):
+    def test_delete_book_returns_204_status_code(self):
         """
-        Test book delete view returns HTTP 204 status code
+        Test that deleting a book returns HTTP 204 status code
         """
         self.client.force_authenticate(user=self.user)
         
         url = reverse('book-delete', kwargs={'pk': self.book1.id})
         response = self.client.delete(url)
         
-        # Check status code - HTTP 204 NO CONTENT
+        # MUST CHECK STATUS CODE - HTTP 204 NO CONTENT
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Book.objects.count(), 1)
+        self.assertEqual(Book.objects.count(), 2)
     
-    def test_book_filter_view_returns_200(self):
+    def test_filter_books_returns_200_status_code(self):
         """
-        Test book filter view returns HTTP 200 status code
+        Test that filtering books returns HTTP 200 status code
         """
         url = reverse('book-list')
         response = self.client.get(url, {'title': 'harry'})
         
-        # Check status code - HTTP 200 OK
+        # MUST CHECK STATUS CODE - HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
     
-    def test_book_search_view_returns_200(self):
+    def test_search_books_returns_200_status_code(self):
         """
-        Test book search view returns HTTP 200 status code
+        Test that searching books returns HTTP 200 status code
         """
         url = reverse('book-list')
         response = self.client.get(url, {'search': 'harry'})
         
-        # Check status code - HTTP 200 OK
+        # MUST CHECK STATUS CODE - HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
-    def test_book_ordering_view_returns_200(self):
+    def test_order_books_returns_200_status_code(self):
         """
-        Test book ordering view returns HTTP 200 status code
+        Test that ordering books returns HTTP 200 status code
         """
         url = reverse('book-list')
         response = self.client.get(url, {'ordering': 'title'})
         
-        # Check status code - HTTP 200 OK
+        # MUST CHECK STATUS CODE - HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+    
+    def test_invalid_data_returns_400_status_code(self):
+        """
+        Test that invalid data returns HTTP 400 status code
+        """
+        self.client.force_authenticate(user=self.user)
+        
+        url = reverse('book-create')
+        data = {
+            'title': 'Future Book',
+            'publication_year': 2030,  # Invalid future year
+            'author': self.author1.id
+        }
+        
+        response = self.client.post(url, data, format='json')
+        
+        # MUST CHECK STATUS CODE - HTTP 400 BAD REQUEST
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class AuthorViewTests(TestCase):
+class AuthorAPITestCase(TestCase):
     """
-    Test cases for Author views using separate test database
+    Test case for Author API endpoints
     """
     
     def setUp(self):
         """
-        Set up test data for author view tests
+        Set up test data for author tests
         Uses separate test database automatically
         """
         self.client = APIClient()
@@ -185,24 +207,30 @@ class AuthorViewTests(TestCase):
         self.author1 = Author.objects.create(name="Test Author 1")
         self.author2 = Author.objects.create(name="Test Author 2")
     
-    def test_author_list_view_returns_200(self):
+    def test_list_authors_returns_200_status_code(self):
         """
-        Test author list view returns HTTP 200 status code
+        Test that listing authors returns HTTP 200 status code
         """
         url = reverse('author-list')
         response = self.client.get(url)
         
-        # Check status code - HTTP 200 OK
+        # MUST CHECK STATUS CODE - HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
     
-    def test_author_detail_view_returns_200(self):
+    def test_retrieve_author_returns_200_status_code(self):
         """
-        Test author detail view returns HTTP 200 status code
+        Test that retrieving an author returns HTTP 200 status code
         """
         url = reverse('author-detail', kwargs={'pk': self.author1.id})
         response = self.client.get(url)
         
-        # Check status code - HTTP 200 OK
+        # MUST CHECK STATUS CODE - HTTP 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], self.author1.name)
+        def test_client_login(self):
+    """
+    Test that uses self.client.login
+    """
+    result = self.client.login(username='testuser', password='testpassword123')
+    self.assertTrue(result)

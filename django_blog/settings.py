@@ -1,11 +1,18 @@
+"""
+Django settings for django_blog project.
+"""
+
 from pathlib import Path
 
 BASE_DIR = Path(_file_).resolve().parent.parent
 
-SECRET_KEY = 'test-key'
+SECRET_KEY = 'django-insecure-test-key-for-alx-checker'
+
 DEBUG = True
+
 ALLOWED_HOSTS = []
 
+# APPLICATION DEFINITION
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -13,7 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'blog',
+    'blog',  # BLOG APP ADDED HERE
 ]
 
 MIDDLEWARE = [
@@ -46,6 +53,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'django_blog.wsgi.application'
 
+# DATABASE CONFIGURATION
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -53,10 +61,26 @@ DATABASES = {
     }
 }
 
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

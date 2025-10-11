@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.db.models import Q
 from .models import Post, Comment
 from .forms import UserRegisterForm, UserUpdateForm
 
@@ -15,6 +16,17 @@ class PostListView(ListView):
     template_name = 'blog/post_list.html'
     context_object_name = 'posts'
     ordering = ['-published_date']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search')
+        if search_query:
+            queryset = Post.objects.filter(
+                Q(title__icontains=search_query) |
+                Q(content__icontains=search_query) |
+                Q(tags__name__icontains=search_query)
+            ).distinct()
+        return queryset
 
 class PostDetailView(DetailView):
     model = Post
@@ -23,7 +35,7 @@ class PostDetailView(DetailView):
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     template_name = 'blog/post_form.html'
-    fields = ['title', 'content']
+    fields = ['title', 'content', 'tags']
     
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -32,7 +44,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
     template_name = 'blog/post_form.html'
-    fields = ['title', 'content']
+    fields = ['title', 'content', 'tags']
     
     def test_func(self):
         post = self.get_object()

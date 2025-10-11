@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'blog',
+    'taggit',
 ]
 
 MIDDLEWARE = [
@@ -37,7 +38,7 @@ ROOT_URLCONF = 'django_blog.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Make sure this line exists
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -49,9 +50,9 @@ TEMPLATES = [
         },
     },
 ]
+
 WSGI_APPLICATION = 'django_blog.wsgi.application'
 
-# DATABASE CONFIGURATION WITH USER AND PORT FIELDS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

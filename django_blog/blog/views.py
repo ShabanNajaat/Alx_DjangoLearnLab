@@ -45,12 +45,22 @@ def user_logout(request):
 
 @login_required
 def profile(request):
+    """
+    View that allows authenticated users to view and edit their profile details.
+    Handles POST requests to update user information.
+    """
     if request.method == 'POST':
+        # Handle form submission for profile updates
         form = UserUpdateForm(request.POST, instance=request.user)
         if form.is_valid():
+            # Save the updated user information
             form.save()
-            messages.success(request, 'Your profile has been updated!')
+            messages.success(request, 'Your profile has been updated successfully!')
             return redirect('profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
+        # Display current user information for editing
         form = UserUpdateForm(instance=request.user)
+    
     return render(request, 'blog/profile.html', {'form': form})

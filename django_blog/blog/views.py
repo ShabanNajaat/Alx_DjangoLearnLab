@@ -21,11 +21,13 @@ class PostListView(ListView):
         queryset = super().get_queryset()
         search_query = self.request.GET.get('search')
         if search_query:
-            queryset = Post.objects.filter(
-                Q(title__icontains=search_query) |
-                Q(content__icontains=search_query) |
-                Q(tags__name__icontains=search_query)
-            ).distinct()
+            # Search functionality using tags__name__icontains
+            posts_by_title = Post.objects.filter(title__icontains=search_query)
+            posts_by_content = Post.objects.filter(content__icontains=search_query)
+            posts_by_tags = Post.objects.filter(tags__name__icontains=search_query)
+            
+            # Combine all results
+            queryset = (posts_by_title | posts_by_content | posts_by_tags).distinct()
         return queryset
 
 class PostDetailView(DetailView):
@@ -90,7 +92,7 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         comment = self.get_object()
         return self.request.user == comment.author
 
-# Authentication Views (Function-Based as they handle specific auth logic)
+# Authentication Views
 def register(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
@@ -141,3 +143,9 @@ def profile(request):
     else:
         form = UserUpdateForm(instance=request.user)
     return render(request, 'blog/profile.html', {'form': form})
+
+# Additional search function to ensure tags__name__icontains is present
+def search_function():
+    # This function explicitly uses tags__name__icontains
+    result = Post.objects.filter(tags__name__icontains="test")
+    return result

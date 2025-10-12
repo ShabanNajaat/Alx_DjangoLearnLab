@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete Post - Django Blog</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav>
+        <div>
+            <a href="{% url 'post_list' %}">Django Blog</a>
+        </div>
+        <div>
+            <a href="{% url 'post_list' %}">Back to Posts</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="form-container">
+            <h1>Delete Post</h1>
+            
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            
+            <div class="confirmation-message">
+                <p>Are you sure you want to delete the post "{{ object.title }}"?</p>
+                <p class="warning">This action cannot be undone.</p>
+            </div>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-actions">
+                    <button type="submit" class="btn-danger">Yes, Delete Post</button>
+                    <a href="{% url 'post_list' %}" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

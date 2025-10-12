@@ -132,3 +132,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Whitenoise configuration for static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# PORT configuration for production deployment
+PORT = os.environ.get('PORT', '8000')

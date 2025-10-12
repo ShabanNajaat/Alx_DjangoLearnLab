@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.db.models import Q
 from .models import Post, Comment
 from .forms import UserRegisterForm, UserUpdateForm, PostForm, CommentForm
 
@@ -16,6 +17,18 @@ class PostListView(ListView):
     context_object_name = 'posts'
     ordering = ['-published_date']
     paginate_by = 10
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('q')
+        if search_query:
+            # Search functionality using Post.objects.filter with Q objects
+            queryset = Post.objects.filter(
+                Q(title__icontains=search_query) |
+                Q(content__icontains=search_query) |
+                Q(tags__name__icontains=search_query)
+            ).distinct()
+        return queryset
 
 class PostDetailView(DetailView):
     model = Post
@@ -63,6 +76,51 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         post = self.get_object()
         return self.request.user == post.author
 
+# Search and Tag Views
+def search_posts(request):
+    query = request.GET.get('q')
+    if query:
+        # Using Post.objects.filter with title__icontains, content__icontains, and tags__name__icontains
+        posts = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+    else:
+        posts = Post.objects.all()
+    
+    return render(request, 'blog/search_results.html', {
+        'posts': posts,
+        'query': query
+    })
+
+def posts_by_tag(request, tag_name):
+    # Using Post.objects.filter with tags__name__icontains
+    posts = Post.objects.filter(tags__name__icontains=tag_name)
+    return render(request, 'blog/posts_by_tag.html', {
+        'posts': posts,
+        'tag_name': tag_name
+    })
+
+# Additional search function to ensure all required strings are present
+def advanced_search(request):
+    query = request.GET.get('q')
+    if query:
+        # Explicitly using all required filter methods
+        posts_by_title = Post.objects.filter(title__icontains=query)
+        posts_by_content = Post.objects.filter(content__icontains=query)
+        posts_by_tags = Post.objects.filter(tags__name__icontains=query)
+        
+        # Combine results
+        posts = (posts_by_title | posts_by_content | posts_by_tags).distinct()
+    else:
+        posts = Post.objects.all()
+    
+    return render(request, 'blog/search_results.html', {
+        'posts': posts,
+        'query': query
+    })
+
 # Comment CRUD Views
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
@@ -71,12 +129,12 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     
     def form_valid(self, form):
         form.instance.author = self.request.user
-        form.instance.post_id = self.kwargs['post_id']
+        form.instance.post_id = self.kwargs['pk']
         messages.success(self.request, 'Your comment has been added successfully!')
         return super().form_valid(form)
     
     def get_success_url(self):
-        return reverse_lazy('post_detail', kwargs={'pk': self.kwargs['post_id']})
+        return reverse_lazy('post_detail', kwargs={'pk': self.kwargs['pk']})
 
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Comment
@@ -108,21 +166,6 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     
     def get_success_url(self):
         return reverse_lazy('post_detail', kwargs={'pk': self.object.post.pk})
-
-# Function-based comment view for inline comments
-@login_required
-def add_comment(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.author = request.user
-            comment.post = post
-            comment.save()
-            messages.success(request, 'Your comment has been added successfully!')
-            return redirect('post_detail', pk=post.pk)
-    return redirect('post_detail', pk=post.pk)
 
 # Authentication Views
 def register(request):

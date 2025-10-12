@@ -67,7 +67,7 @@ def user_feed(request):
     
     # Get posts from followed users using the exact required syntax
     following_users = request.user.following.all()
-    feed_posts = Post.objects.filter(author__in=following_users).order_by('-created_at').select_related('author').prefetch_related('comments__author')
+    feed_posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
     
     # Apply pagination
     page = request.query_params.get('page', 1)

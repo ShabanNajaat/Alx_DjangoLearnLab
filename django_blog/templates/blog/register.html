@@ -1,31 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Django Blog</title>
     {% load static %}
+    <!-- Main CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Authentication Specific CSS -->
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 </head>
 <body>
-    <header>
-        <nav>
-            <h1><a href="{% url 'post_list' %}">Django Blog</a></h1>
-            <div class="nav-links">
-                <a href="{% url 'login' %}">Login</a>
-            </div>
-        </nav>
-    </header>
+    <nav>
+        <div>
+            <a href="{% url 'post_list' %}">Django Blog</a>
+        </div>
+        <div>
+            <a href="{% url 'login' %}">Login</a>
+        </div>
+    </nav>
 
-    <main>
+    <div class="main-content">
         <div class="auth-container">
-            <h2>Create Your Account</h2>
+            <h2 class="auth-title">Create Your Account</h2>
             
             {% if messages %}
+            <ul class="messages">
                 {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
+                <li class="message {{ message.tags }}">{{ message }}</li>
                 {% endfor %}
+            </ul>
             {% endif %}
             
             <form method="POST" class="auth-form">
@@ -33,9 +37,9 @@
                 
                 <div class="form-group">
                     <label for="id_username">Username:</label>
-                    <input type="text" name="username" id="id_username" required>
+                    <input type="text" name="username" id="id_username" required autofocus>
                     {% if form.username.errors %}
-                        <div class="error">{{ form.username.errors }}</div>
+                    <div class="error-message">{{ form.username.errors }}</div>
                     {% endif %}
                 </div>
                 
@@ -43,7 +47,7 @@
                     <label for="id_email">Email:</label>
                     <input type="email" name="email" id="id_email" required>
                     {% if form.email.errors %}
-                        <div class="error">{{ form.email.errors }}</div>
+                    <div class="error-message">{{ form.email.errors }}</div>
                     {% endif %}
                 </div>
                 
@@ -51,7 +55,7 @@
                     <label for="id_password1">Password:</label>
                     <input type="password" name="password1" id="id_password1" required>
                     {% if form.password1.errors %}
-                        <div class="error">{{ form.password1.errors }}</div>
+                    <div class="error-message">{{ form.password1.errors }}</div>
                     {% endif %}
                 </div>
                 
@@ -59,17 +63,20 @@
                     <label for="id_password2">Confirm Password:</label>
                     <input type="password" name="password2" id="id_password2" required>
                     {% if form.password2.errors %}
-                        <div class="error">{{ form.password2.errors }}</div>
+                    <div class="error-message">{{ form.password2.errors }}</div>
                     {% endif %}
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Register</button>
+                <button type="submit" class="auth-button">Register</button>
             </form>
             
             <div class="auth-links">
-                <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+                <p>Already have an account? <a href="{% url 'login' %}" class="auth-link">Login here</a></p>
             </div>
         </div>
-    </main>
+    </div>
+
+    <!-- Authentication JavaScript -->
+    <script src="{% static 'js/auth.js' %}"></script>
 </body>
 </html>

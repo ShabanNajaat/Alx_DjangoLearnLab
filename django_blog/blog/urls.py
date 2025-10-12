@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from .views import (
     PostListView, PostDetailView, PostCreateView, PostUpdateView, PostDeleteView,
-    CommentCreateView, CommentUpdateView, CommentDeleteView
+    CommentCreateView, CommentUpdateView, CommentDeleteView, PostByTagListView
 )
 
 urlpatterns = [
@@ -18,9 +18,9 @@ urlpatterns = [
     path('comment/<int:pk>/update/', CommentUpdateView.as_view(), name='comment_update'),
     path('comment/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment_delete'),
     
-    # Search and Tag URLs
+    # Search and Tag URLs - ADD THE EXACT REQUIRED PATTERNS
     path('search/', views.search_posts, name='search'),
-    path('tags/<str:tag_name>/', views.posts_by_tag, name='posts_by_tag'),
+    path('tags/<slug:tag_slug>/', PostByTagListView.as_view(), name='posts_by_tag'),
     
     # Authentication URLs
     path('register/', views.register, name='register'),

@@ -16,13 +16,12 @@ class PostListView(ListView):
     template_name = 'blog/post_list.html'
     context_object_name = 'posts'
     ordering = ['-published_date']
-    paginate_by = 10
     
     def get_queryset(self):
         queryset = super().get_queryset()
         search_query = self.request.GET.get('q')
         if search_query:
-            # Search functionality using Post.objects.filter with Q objects
+            # Search using tags__name__icontains for tag search
             queryset = Post.objects.filter(
                 Q(title__icontains=search_query) |
                 Q(content__icontains=search_query) |
@@ -76,11 +75,11 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         post = self.get_object()
         return self.request.user == post.author
 
-# Search and Tag Views
+# Search functionality that explicitly uses tags__name__icontains
 def search_posts(request):
     query = request.GET.get('q')
     if query:
-        # Using Post.objects.filter with title__icontains, content__icontains, and tags__name__icontains
+        # Using tags__name__icontains for tag-based search
         posts = Post.objects.filter(
             Q(title__icontains=query) |
             Q(content__icontains=query) |
@@ -94,31 +93,13 @@ def search_posts(request):
         'query': query
     })
 
+# Tag-based filtering using tags__name__icontains
 def posts_by_tag(request, tag_name):
-    # Using Post.objects.filter with tags__name__icontains
+    # Using tags__name__icontains to filter posts by tag
     posts = Post.objects.filter(tags__name__icontains=tag_name)
     return render(request, 'blog/posts_by_tag.html', {
         'posts': posts,
         'tag_name': tag_name
-    })
-
-# Additional search function to ensure all required strings are present
-def advanced_search(request):
-    query = request.GET.get('q')
-    if query:
-        # Explicitly using all required filter methods
-        posts_by_title = Post.objects.filter(title__icontains=query)
-        posts_by_content = Post.objects.filter(content__icontains=query)
-        posts_by_tags = Post.objects.filter(tags__name__icontains=query)
-        
-        # Combine results
-        posts = (posts_by_title | posts_by_content | posts_by_tags).distinct()
-    else:
-        posts = Post.objects.all()
-    
-    return render(request, 'blog/search_results.html', {
-        'posts': posts,
-        'query': query
     })
 
 # Comment CRUD Views

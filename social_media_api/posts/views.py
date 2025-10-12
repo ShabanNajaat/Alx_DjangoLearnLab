@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status, filters
+from rest_framework import viewsets, status, filters, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -56,12 +56,12 @@ class PostViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
-        post = self.get_object()
+        post = generics.get_object_or_404(Post, pk=pk)
         
         if post.is_liked_by(request.user):
             return Response({'error': 'You have already liked this post'}, status=status.HTTP_400_BAD_REQUEST)
         
-        like = Like.objects.create(user=request.user, post=post)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
         
         # Create notification for post author (if not liking own post)
         if post.author != request.user:
@@ -76,7 +76,7 @@ class PostViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unlike(self, request, pk=None):
-        post = self.get_object()
+        post = generics.get_object_or_404(Post, pk=pk)
         
         if not post.is_liked_by(request.user):
             return Response({'error': 'You have not liked this post'}, status=status.HTTP_400_BAD_REQUEST)

@@ -1,10 +1,8 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser
+from django.urls import path, include
 
-@admin.register(CustomUser)
-class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'bio')
-    fieldsets = UserAdmin.fieldsets + (
-        ('Additional Info', {'fields': ('bio', 'profile_picture', 'followers')}),
-    )
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/accounts/', include('accounts.urls')),
+    path('api/', include('posts.urls')),  # Add this line
+]

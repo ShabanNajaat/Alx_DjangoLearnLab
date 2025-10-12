@@ -1,53 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ post.title }} - Django Blog</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
-<body>
-    <nav>
-        <div>
-            <a href="{% url 'post_list' %}">Django Blog</a>
-        </div>
-        <div>
-            {% if user.is_authenticated %}
-                <span>Hello, {{ user.username }}!</span>
-                <a href="{% url 'post_create' %}">New Post</a>
-                <a href="{% url 'profile' %}">Profile</a>
-                <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a href="{% url 'register' %}">Register</a>
-            {% endif %}
-        </div>
-    </nav>
-
-    <div class="main-content">
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li class="message {{ message.tags }}">{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        
-        <article class="post-detail">
-            <h1>{{ post.title }}</h1>
-            <div class="post-meta">
-                By {{ post.author.username }} on {{ post.published_date|date:"F j, Y" }}
+<!-- Add this section to the post_detail.html template -->
+<section class="comments-section">
+    <h3>Comments ({{ comments.count }})</h3>
+    
+    <!-- Comment Form -->
+    {% if user.is_authenticated %}
+    <div class="comment-form">
+        <h4>Add a Comment</h4>
+        <form method="POST" action="{% url 'add_comment' post.pk %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <textarea name="content" class="form-control" placeholder="Write your comment..." rows="3" required></textarea>
             </div>
-            <div class="post-content">
-                {{ post.content|linebreaks }}
-            </div>
-            <div class="post-actions">
-                <a href="{% url 'post_list' %}">Back to All Posts</a>
-                {% if user.is_authenticated and user == post.author %}
-                <a href="{% url 'post_update' post.pk %}">Edit Post</a>
-                <a href="{% url 'post_delete' post.pk %}">Delete Post</a>
+            <button type="submit" class="btn-primary">Post Comment</button>
+        </form>
+    </div>
+    {% else %}
+    <p><a href="{% url 'login' %}">Log in</a> to add a comment.</p>
+    {% endif %}
+    
+    <!-- Comments List -->
+    <div class="comments-list">
+        {% for comment in comments %}
+        <div class="comment">
+            <div class="comment-header">
+                <strong>{{ comment.author.username }}</strong>
+                <span class="comment-date">{{ comment.created_at|date:"F j, Y, g:i a" }}</span>
+                {% if comment.updated_at != comment.created_at %}
+                <span class="comment-edited">(edited)</span>
                 {% endif %}
             </div>
-        </article>
+            <div class="comment-content">
+                {{ comment.content|linebreaks }}
+            </div>
+            {% if user.is_authenticated and user == comment.author %}
+            <div class="comment-actions">
+                <a href="{% url 'comment_update' comment.pk %}">Edit</a>
+                <a href="{% url 'comment_delete' comment.pk %}">Delete</a>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p>No comments yet. Be the first to comment!</p>
+        {% endfor %}
     </div>
-</body>
-</html>
+</section>

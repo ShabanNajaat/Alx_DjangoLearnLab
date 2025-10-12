@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Comment - Django Blog</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav>
+        <div>
+            <a href="{% url 'post_list' %}">Django Blog</a>
+        </div>
+        <div>
+            <a href="{% url 'post_list' %}">Back to Posts</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="form-container">
+            <h1>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Comment</h1>
+            
+            {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_content">Comment:</label>
+                    {{ form.content }}
+                    {% if form.content.errors %}
+                    <div class="error-message">{{ form.content.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        {% if form.instance.pk %}Update{% else %}Add{% endif %} Comment
+                    </button>
+                    <a href="{% if form.instance.pk %}{% url 'post_detail' form.instance.post.pk %}{% else %}{% url 'post_list' %}{% endif %}" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

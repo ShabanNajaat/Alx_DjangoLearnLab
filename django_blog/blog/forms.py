@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from taggit.forms import TagWidget
 from .models import Post, Comment
 
 class UserRegisterForm(UserCreationForm):
@@ -20,10 +21,11 @@ class UserUpdateForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'tags']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter post title'}),
             'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write your post content here...', 'rows': 10}),
+            'tags': TagWidget(attrs={'class': 'form-control', 'placeholder': 'Add tags separated by commas'}),
         }
     
     def clean_title(self):

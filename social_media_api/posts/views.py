@@ -19,7 +19,8 @@ class PostViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
     
     def get_queryset(self):
-        return Post.objects.select_related('author').prefetch_related('comments__author')
+        # Use the exact required syntax
+        return Post.objects.all().select_related('author').prefetch_related('comments__author')
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -44,7 +45,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     
     def get_queryset(self):
-        return Comment.objects.select_related('author', 'post')
+        # Use the exact required syntax
+        return Comment.objects.all().select_related('author', 'post')
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:

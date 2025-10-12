@@ -5,12 +5,15 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import permissions
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Post, Comment
+from django.shortcuts import get_object_or_404
+from .models import Post, Comment, Like
 from .serializers import (
     PostSerializer, PostCreateSerializer, 
-    CommentSerializer, CommentCreateSerializer
+    CommentSerializer, CommentCreateSerializer,
+    LikeSerializer
 )
 from .permissions import IsAuthorOrReadOnly
+from notifications.models import Notification
 
 class PostViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
@@ -21,7 +24,7 @@ class PostViewSet(viewsets.ModelViewSet):
     ordering = ['-created_at']
     
     def get_queryset(self):
-        return Post.objects.all().select_related('author').prefetch_related('comments__author')
+        return Post.objects.all().select_related('author').prefetch_related('comments__author', 'likes__user')
     
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update']:
@@ -38,8 +41,55 @@ class PostViewSet(viewsets.ModelViewSet):
         
         if serializer.is_valid():
             comment = serializer.save(post=post, author=request.user)
+            
+            # Create notification for post author (if not commenting on own post)
+            if post.author != request.user:
+                Notification.objects.create(
+                    recipient=post.author,
+                    actor=request.user,
+                    verb='comment',
+                    target=post
+                )
+            
             return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
+        post = self.get_object()
+        
+        if post.is_liked_by(request.user):
+            return Response({'error': 'You have already liked this post'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        like = Like.objects.create(user=request.user, post=post)
+        
+        # Create notification for post author (if not liking own post)
+        if post.author != request.user:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb='like',
+                target=post
+            )
+        
+        return Response(LikeSerializer(like).data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def unlike(self, request, pk=None):
+        post = self.get_object()
+        
+        if not post.is_liked_by(request.user):
+            return Response({'error': 'You have not liked this post'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        Like.objects.filter(user=request.user, post=post).delete()
+        return Response({'message': 'Post unliked successfully'}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticatedOrReadOnly])
+    def likes(self, request, pk=None):
+        post = self.get_object()
+        likes = post.likes.select_related('user')
+        serializer = LikeSerializer(likes, many=True)
+        return Response(serializer.data)
 
 class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
@@ -82,7 +132,7 @@ def user_feed(request):
     end_index = start_index + page_size
     
     paginated_posts = feed_posts[start_index:end_index]
-    serializer = PostSerializer(paginated_posts, many=True)
+    serializer = PostSerializer(paginated_posts, many=True, context={'request': request})
     
     return Response({
         'posts': serializer.data,

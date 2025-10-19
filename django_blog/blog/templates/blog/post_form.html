@@ -1,0 +1,46 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block title %}Create New Post - Django Blog{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Create New Post</h2>
+    
+    <form method="post" class="post-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="id_title">Title</label>
+            <input type="text" name="title" id="id_title" class="form-control" 
+                   value="{{ form.title.value|default:'' }}" required 
+                   placeholder="Enter a compelling title for your post">
+            {% if form.title.errors %}
+            <div class="errorlist">
+                {% for error in form.title.errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_content">Content</label>
+            <textarea name="content" id="id_content" class="form-control" rows="12" 
+                      required placeholder="Write your amazing content here...">{{ form.content.value|default:'' }}</textarea>
+            {% if form.content.errors %}
+            <div class="errorlist">
+                {% for error in form.content.errors %}
+                <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Post</button>
+            <a href="{% url 'post_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
